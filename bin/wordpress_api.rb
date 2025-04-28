@@ -1,4 +1,5 @@
 require 'json'
+
 class WordpressApi
   attr_reader :url
 
