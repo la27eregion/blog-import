@@ -30,6 +30,9 @@ def convert_path(path)
     migration_identifier: migration_identifier,
     created_at: data['date_gmt'],
     updated_at: data['modified_gmt'],
+    category_ids: [
+      'ac8e2057-df7e-4d88-8419-43907deba97a'
+    ],
     localizations: {
       fr: {
         migration_identifier: "#{migration_identifier}-fr",
@@ -65,42 +68,64 @@ def extract_image(html)
 end
 
 def parse_content(html, migration_identifier)
-  position = 0
   chapter_index = 0
   image_index = 0
   blocks = []
+  chapter_content = ''
   html.children.each_with_index do |child, index|
     next if index.zero?
     case child.name
     when 'p'
-      blocks << {
-        template_kind: 'chapter',
-        migration_identifier: "#{migration_identifier}-chapter-#{chapter_index}",
-        position: position,
-        data: {
-          text: child.to_s
-        }
-      }
-      position += 1
-      chapter_index += 1
+      chapter_content += child.to_s
     when 'figure'
       if image_index.zero?
         image_index += 1
         next
       end
-      blocks << {
-        template_kind: 'image',
-        migration_identifier: "#{migration_identifier}-image-#{image_index}",
-        position: position,
-        data: {
-          url: child.children.first['href']
-        }
-      }
-      position += 1
+      block = block_chapter "#{migration_identifier}-chapter-#{chapter_index}",
+                            blocks.count,
+                            chapter_content
+      blocks << block
+      chapter_content = ''
+      chapter_index += 1
+
+      block = block_image "#{migration_identifier}-image-#{image_index}",
+                          blocks.count,
+                          child.children.first['href']
+      blocks << block
       image_index += 1
     end
   end
+  if chapter_content != ''
+    block = block_chapter "#{migration_identifier}-chapter-#{chapter_index}",
+                          blocks.count,
+                          chapter_content
+    blocks << block
+  end
   blocks
+end
+
+def block_chapter(migration_identifier, position, text)
+  clean_text = text.gsub("class=\"spip_out\" ", '')
+  {
+    template_kind: 'chapter',
+    migration_identifier: migration_identifier,
+    position: position,
+    data: {
+      text: clean_text
+    }
+  }
+end
+
+def block_image(migration_identifier, position, url)
+  {
+    template_kind: 'image',
+    migration_identifier: migration_identifier,
+    position: position,
+    data: {
+      url: url
+    }
+  }
 end
 
 def convert_directory
