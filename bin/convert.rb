@@ -182,8 +182,7 @@ SOURCE_DIRECTORY = './imported_posts/'
 
 def convert_id(id)
   puts "Convert id #{id}"
-  path = "#{SOURCE_DIRECTORY}#{id}.json"
-  convert_path path
+  convert_path "#{SOURCE_DIRECTORY}#{id}.json"
 end
 
 def convert_path(path)
@@ -200,8 +199,5 @@ def convert_directory
   end
 end
 
-if ARGV.empty?
-  convert_directory
-else
-  convert_id(ARGV.first)
-end
+ARGV.empty? ? convert_directory
+            : convert_id(ARGV.first)
