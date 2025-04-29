@@ -127,6 +127,7 @@ DEPENDENCIES
   byebug
   dotenv
   httparty
+  nokogiri
   osuny_api
   rest-client
   sanitize
