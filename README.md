@@ -19,7 +19,7 @@ bundle install
 ### Importer depuis WordPress
 
 ```bash
-bundle exec ruby bin/import.rb
+bundle exec ruby bin/import.rb 
 ```
 
 ### Convertir pour Osuny
@@ -28,8 +28,21 @@ bundle exec ruby bin/import.rb
 bundle exec ruby bin/convert.rb
 ```
 
+Pour convertir un seul fichier
+
+```bash
+bundle exec ruby bin/convert.rb 99
+```
+
 ### Exporter vers Osuny
 
 ```bash
 bundle exec ruby bin/export.rb
 ```
+
+Pour exporter un seul fichier
+
+```bash
+bundle exec ruby bin/export.rb 99
+```
+
