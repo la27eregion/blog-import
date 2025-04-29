@@ -1,9 +1,7 @@
 require 'json'
-require 'rubygems'
 require 'bundler/setup'
 
 Bundler.require(:default)
-Dotenv.load
 
 class Analyzer
   IDENTIFIER = 'la27eregion-blog'
