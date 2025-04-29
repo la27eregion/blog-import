@@ -5,21 +5,6 @@ require 'bundler/setup'
 Bundler.require(:default)
 Dotenv.load
 
-SOURCE_DIRECTORY = './imported_posts/'
-
-def convert_id(id)
-  puts "Convert id #{id}"
-  path = "#{SOURCE_DIRECTORY}#{id}.json"
-  convert_path path
-end
-
-def convert_path(path)
-  puts "Convert path #{path}"
-  analyzer = Analyzer.new path
-  puts JSON.pretty_generate(analyzer.hash)
-  File.write("converted_posts/#{analyzer.id}.json", analyzer.hash.to_json)
-end
-
 class Analyzer
   IDENTIFIER = 'la27eregion-blog'
 
@@ -79,27 +64,36 @@ class Analyzer
 
   def blocks
     @chapter_index = 0
-    @image_index = 0
+    @image_index = -1
+    @video_index = 0
+    @embed_index = 0
     @blocks = []
     @chapter_content = ''
     html.children.each_with_index do |child, index|
       # First paragraph is summary
-      next if index.zero?
+      next if index.zero?      
       case child.name
       when 'p'
-        if '<iframe'.include?(child.to_s)
+        if child.to_s.include?('www.youtube.com')
+          flush_chapter
+          add_video child.children.first['src']
+        elsif child.to_s.include?('<iframe')
+          flush_chapter
+          add_embed child.children.first.to_s
+        else
+          @chapter_content += child.to_s
         end
-        @chapter_content += child.to_s
       when 'figure'
-        if @image_index.zero?
+        # First image is featured_image
+        if @image_index == -1
           @image_index += 1
           next
         end
-        add_chapter @chapter_content
+        flush_chapter
         add_image child.children.first['href']
       end
     end
-    add_chapter @chapter_content if @chapter_content != ''
+    flush_chapter
     @blocks
   end
 
@@ -107,6 +101,10 @@ class Analyzer
 
   def position
     @blocks.count
+  end
+
+  def flush_chapter
+    add_chapter @chapter_content if @chapter_content != ''
   end
 
   def add_chapter(text)
@@ -125,6 +123,7 @@ class Analyzer
   end
 
   def add_image(url)
+    return if url.nil?
     @blocks << {
       template_kind: 'image',
       migration_identifier: "#{migration_identifier}-image-#{@image_index}",
@@ -134,6 +133,32 @@ class Analyzer
       }
     }
     @image_index += 1
+  end
+
+  def add_video(url)
+    return if url.nil?
+    url = url.gsub('//www.youtube.com', 'https://www.youtube.com')
+    @blocks << {
+      template_kind: 'video',
+      migration_identifier: "#{migration_identifier}-video-#{@video_index}",
+      position: position,
+      data: {
+        url: url
+      }
+    }
+    @video_index += 1
+  end
+
+  def add_embed(code)
+    @blocks << {
+      template_kind: 'video',
+      migration_identifier: "#{migration_identifier}-embed-#{@embed_index}",
+      position: position,
+      data: {
+        code: code
+      }
+    }
+    @embed_index += 1
   end
 
   def file
@@ -153,6 +178,20 @@ class Analyzer
   end
 end
 
+SOURCE_DIRECTORY = './imported_posts/'
+
+def convert_id(id)
+  puts "Convert id #{id}"
+  path = "#{SOURCE_DIRECTORY}#{id}.json"
+  convert_path path
+end
+
+def convert_path(path)
+  puts "Convert path #{path}"
+  analyzer = Analyzer.new path
+  puts JSON.pretty_generate(analyzer.hash)
+  File.write("converted_posts/#{analyzer.id}.json", analyzer.hash.to_json)
+end
 
 def convert_directory
   puts "Convert directory"
