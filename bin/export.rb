@@ -22,8 +22,16 @@ end
 def export_path(path)
   puts "Export path #{path}"
   file = File.read path
+  object = JSON.parse file
+  data = {
+    body: {
+      posts: [
+        object
+      ]
+    }
+  }
   begin
-    result = API.communication_websites_website_id_posts_upsert_post(ENV['OSUNY_WEBSITE_ID'], { body: file })
+    result = API.communication_websites_website_id_posts_upsert_post(ENV['OSUNY_WEBSITE_ID'], data)
   rescue OsunyApi::ApiError => e
     puts "Exception when calling CommunicationWebsitePostApi->communication_websites_website_id_posts_upsert_post: #{e}"
   end
