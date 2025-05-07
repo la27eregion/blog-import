@@ -4,9 +4,14 @@ require 'bundler/setup'
 Bundler.require(:default)
 Dotenv.load
 
-OSUNY = OsunyApi.new host: ENV['OSUNY_API_HOST'], token: ENV['OSUNY_API_TOKEN']
-WEBSITE = OSUNY.communication.website ENV['OSUNY_WEBSITE_ID']
+OsunyApi.configure do |config|
+  config.api_key['X-Osuny-Token'] = ENV['OSUNY_API_TOKEN']
+  config.host = 'la27eregion.osuny.org'
+  config.base_path = '/api/osuny/v1'
+  config.debugging = true
+end
 
+API = OsunyApi::CommunicationWebsitePostApi.new
 SOURCE_DIRECTORY = './converted_posts/'
 
 def export_id(id)
@@ -17,13 +22,17 @@ end
 def export_path(path)
   puts "Export path #{path}"
   file = File.read path
-  WEBSITE.post.import file
+  begin
+    result = API.communication_websites_website_id_posts_upsert_post(ENV['OSUNY_WEBSITE_ID'], { body: file })
+  rescue OsunyApi::ApiError => e
+    puts "Exception when calling CommunicationWebsitePostApi->communication_websites_website_id_posts_upsert_post: #{e}"
+  end
 end
 
 def export_directory
   puts "Export directory"
   Dir["#{SOURCE_DIRECTORY}*.json"].each do |path|
-    convert_path path
+    export_path path
   end
 end
 
