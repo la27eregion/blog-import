@@ -8,7 +8,7 @@ OsunyApi.configure do |config|
   config.api_key['X-Osuny-Token'] = ENV['OSUNY_API_TOKEN']
   config.host = 'la27eregion.osuny.org'
   config.base_path = '/api/osuny/v1'
-  config.debugging = true
+  # config.debugging = true
 end
 
 API = OsunyApi::CommunicationWebsitePostApi.new
