@@ -46,3 +46,29 @@ Pour exporter un seul fichier
 bundle exec ruby bin/export.rb 99
 ```
 
+Problèmes 
+- 10331 : ok, image supprimée et envoyée à la main
+- 112 : ok, slug corrigé à la main
+- 14201 : ok, slug corrigé à la main
+- 4794 : ok, slug corrigé à la main
+- 6211 : ok, image réduite et envoyée à la main
+- 14050 : ?
+- 2384 : ?
+- 4107 : ?
+- 4312 : ?
+- 4846 : ?
+- 4883 : ?
+- 5049 : ?
+- 5517 : ?
+- 6861 : ?
+- 7642 : ?
+- 7693 : ?
+- 8315 : ?
+- 8780 : ?
+- 8821 : ?
+- 8877 : ?
+- 9214 : ?
+- 9463 : ?
+- 9495 : ?
+- 9560 : ?
+- 9767 : ?
